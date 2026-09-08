@@ -1,26 +1,26 @@
-defmodule Inbox.Test.Task do
+defmodule Korero.Test.Task do
   @moduledoc false
 
   use Ash.Resource,
-    domain: Inbox.Test.Domain,
+    domain: Korero.Test.Domain,
     data_layer: Ash.DataLayer.Ets,
-    extensions: [Inbox.Test.EtsIdentities],
-    fragments: [Inbox.Task]
+    extensions: [Korero.Test.EtsIdentities],
+    fragments: [Korero.Task]
 
   ets do
     private? true
   end
 end
 
-defmodule Inbox.Test.ProtectedTask do
+defmodule Korero.Test.ProtectedTask do
   @moduledoc false
 
   use Ash.Resource,
-    domain: Inbox.Test.Domain,
+    domain: Korero.Test.Domain,
     data_layer: Ash.DataLayer.Ets,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [Inbox.Test.EtsIdentities],
-    fragments: [Inbox.Task]
+    extensions: [Korero.Test.EtsIdentities],
+    fragments: [Korero.Task]
 
   ets do
     private? true
@@ -33,15 +33,15 @@ defmodule Inbox.Test.ProtectedTask do
   end
 end
 
-defmodule Inbox.Test.JobTask do
+defmodule Korero.Test.JobTask do
   @moduledoc false
 
   use Ash.Resource,
-    domain: Inbox.Test.Domain,
+    domain: Korero.Test.Domain,
     data_layer: Ash.DataLayer.Ets,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [Inbox.Test.EtsIdentities],
-    fragments: [Inbox.Task]
+    extensions: [Korero.Test.EtsIdentities],
+    fragments: [Korero.Task]
 
   ets do
     private? true
@@ -66,8 +66,8 @@ defmodule Inbox.Test.JobTask do
               )
 
         scheduler_cron false
-        queue :inbox
-        worker_module_name Inbox.Test.StartMachineWorker
+        queue :korero
+        worker_module_name Korero.Test.StartMachineWorker
         default_actor %{role: :queue_worker}
       end
     end
@@ -89,14 +89,14 @@ defmodule Inbox.Test.JobTask do
   end
 end
 
-defmodule Inbox.Test.Domain do
+defmodule Korero.Test.Domain do
   @moduledoc false
 
   use Ash.Domain, validate_config_inclusion?: false
 
   resources do
-    resource Inbox.Test.Task
-    resource Inbox.Test.ProtectedTask
-    resource Inbox.Test.JobTask
+    resource Korero.Test.Task
+    resource Korero.Test.ProtectedTask
+    resource Korero.Test.JobTask
   end
 end

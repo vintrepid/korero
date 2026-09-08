@@ -1,7 +1,7 @@
-defmodule Inbox.TaskTest do
+defmodule Korero.TaskTest do
   use ExUnit.Case, async: true
 
-  alias Inbox.Test.Task
+  alias Korero.Test.Task
 
   describe "standalone workflow" do
     test "a generic task needs no target and may be completed directly" do
@@ -168,10 +168,12 @@ defmodule Inbox.TaskTest do
       assert {:ok, nil} = Task.by_request_key("request:missing", authorize?: false)
 
       assert {:error, :task_not_found} =
-               Inbox.Task.complete_by_request_key(Task, "request:missing", %{}, authorize?: false)
+               Korero.Task.complete_by_request_key(Task, "request:missing", %{},
+                 authorize?: false
+               )
 
       assert {:error, :task_not_found} =
-               Inbox.Task.cancel_by_request_key(Task, "request:missing", %{}, authorize?: false)
+               Korero.Task.cancel_by_request_key(Task, "request:missing", %{}, authorize?: false)
     end
 
     test "request is the only creation path that accepts a request key" do
@@ -237,7 +239,7 @@ defmodule Inbox.TaskTest do
       complete_task = Task.request!(complete_request, authorize?: false)
 
       assert {:ok, completed} =
-               Inbox.Task.complete_by_request_key(
+               Korero.Task.complete_by_request_key(
                  Task,
                  complete_task.request_key,
                  %{completed_by_key: "user:one"},
@@ -245,7 +247,7 @@ defmodule Inbox.TaskTest do
                )
 
       assert {:ok, completed_retry} =
-               Inbox.Task.complete_by_request_key(
+               Korero.Task.complete_by_request_key(
                  Task,
                  complete_task.request_key,
                  %{completed_by_key: "user:two"},
@@ -264,7 +266,7 @@ defmodule Inbox.TaskTest do
         )
 
       assert {:ok, cancelled} =
-               Inbox.Task.cancel_by_request_key(
+               Korero.Task.cancel_by_request_key(
                  Task,
                  cancel_task.request_key,
                  %{cancelled_by_key: "user:one"},
@@ -272,7 +274,7 @@ defmodule Inbox.TaskTest do
                )
 
       assert {:ok, cancelled_retry} =
-               Inbox.Task.cancel_by_request_key(
+               Korero.Task.cancel_by_request_key(
                  Task,
                  cancel_task.request_key,
                  %{cancelled_by_key: "user:two"},
@@ -300,7 +302,7 @@ defmodule Inbox.TaskTest do
   end
 
   test "host authorization governs both native actions and terminal retry helpers" do
-    alias Inbox.Test.ProtectedTask
+    alias Korero.Test.ProtectedTask
 
     attributes = %{request_key: "protected:one", title: "Protected work"}
     actor = %{role: :operator}
@@ -311,7 +313,7 @@ defmodule Inbox.TaskTest do
     task = ProtectedTask.request!(attributes, actor: actor, authorize?: true)
 
     assert {:error, %Ash.Error.Forbidden{}} =
-             Inbox.Task.complete_by_request_key(ProtectedTask, task.request_key, %{},
+             Korero.Task.complete_by_request_key(ProtectedTask, task.request_key, %{},
                actor: %{role: :visitor},
                authorize?: true
              )
@@ -319,7 +321,7 @@ defmodule Inbox.TaskTest do
     assert ProtectedTask.by_id!(task.id, actor: actor, authorize?: true).status == :queued
 
     assert {:ok, %{status: :completed}} =
-             Inbox.Task.complete_by_request_key(ProtectedTask, task.request_key, %{},
+             Korero.Task.complete_by_request_key(ProtectedTask, task.request_key, %{},
                actor: actor,
                authorize?: true
              )

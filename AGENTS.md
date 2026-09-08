@@ -1,8 +1,9 @@
-# Inbox Agent Rules
+# Korero Agent Rules
 
-1. Inbox is an independent, application-neutral Ash task and job queue built on
-   Oban and AshOban. Never include host application data, private paths,
-   credentials, or client policy.
+1. Korero is an independent, application-neutral foundation for a conversation,
+   email-client, and task-runner experience, built on Ash, Oban, and AshOban.
+   Its current artifact is a library, not a finished email client. Never include
+   host application data, private paths, credentials, or client policy.
 2. Host resources own their domain, data layer, table, tenancy, and authorization.
    Expose reusable lifecycle through native Ash fragments and actions, not copied
    resource implementations or a separate persistence boundary.
@@ -22,4 +23,8 @@
 7. Tests assert behavior through Ash actions, with isolated synthetic resources.
    Prefer lifecycle, idempotency, authorization, and concurrency invariants over
    assertions about DSL shape or configuration. Read these rules before tests.
-8. Keep the dependency graph acyclic. Inbox must not depend on AshLotus or a host.
+8. Keep the dependency graph acyclic. Korero must not depend on AshLotus or a host.
+9. Use the public package/app name `korero` and `Korero` module namespace. Keep
+   the README a short product introduction; technical contracts and integration
+   instructions belong in `docs/integration.md`. Pre-1.0 publication does not
+   freeze the API or imply production readiness.

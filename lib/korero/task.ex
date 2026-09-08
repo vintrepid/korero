@@ -1,8 +1,8 @@
-defmodule Inbox.Task do
+defmodule Korero.Task do
   @moduledoc """
   Reusable Ash fragment for host-owned tasks and their generic queue lifecycle.
 
-  Use `fragments: [Inbox.Task]` on an Ash resource. The fragment supplies
+  Use `fragments: [Korero.Task]` on an Ash resource. The fragment supplies
   attributes, actions, code interfaces, request-key identity, optimistic
   revisions, AshStateMachine transitions, and the AshOban extension. It supplies
   no data layer, domain, table, tenancy, authorization policy, default trigger,
@@ -113,19 +113,19 @@ defmodule Inbox.Task do
     create :create do
       primary? true
       accept @create_attributes
-      validate &Inbox.Task.validate_optional_pairs/2
+      validate &Korero.Task.validate_optional_pairs/2
     end
 
     create :request do
       accept [:request_key | @create_attributes]
       validate present(:request_key)
-      validate &Inbox.Task.validate_optional_pairs/2
+      validate &Korero.Task.validate_optional_pairs/2
 
       upsert? true
       upsert_identity :unique_request_key
       upsert_fields []
 
-      change after_action(&Inbox.Task.verify_idempotent_request/3)
+      change after_action(&Korero.Task.verify_idempotent_request/3)
     end
 
     update :assign do
@@ -147,7 +147,7 @@ defmodule Inbox.Task do
       require_atomic? false
       accept [:assignee_key]
       change transition_state(:in_progress)
-      change before_action(&Inbox.Task.prepare_start/2)
+      change before_action(&Korero.Task.prepare_start/2)
       change set_attribute(:next_action_at, nil)
     end
 
@@ -169,7 +169,7 @@ defmodule Inbox.Task do
       require_atomic? false
       accept [:disposition, :completed_by_key]
       change transition_state(:completed)
-      change before_action(&Inbox.Task.prepare_completion/2)
+      change before_action(&Korero.Task.prepare_completion/2)
       change set_attribute(:priority, nil)
       change set_attribute(:next_action_at, nil)
     end
@@ -180,7 +180,7 @@ defmodule Inbox.Task do
       change transition_state(:cancelled)
       change set_attribute(:priority, nil)
       change set_attribute(:next_action_at, nil)
-      change before_action(&Inbox.Task.prepare_cancellation/2)
+      change before_action(&Korero.Task.prepare_cancellation/2)
     end
   end
 

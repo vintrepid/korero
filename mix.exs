@@ -1,12 +1,12 @@
-defmodule Inbox.MixProject do
+defmodule Korero.MixProject do
   use Mix.Project
 
-  @version "0.1.0-alpha.1"
-  @source_url "https://github.com/vintrepid/inbox"
+  @version "0.1.0-alpha.2"
+  @source_url "https://github.com/vintrepid/korero"
 
   def project do
     [
-      app: :inbox,
+      app: :korero,
       version: @version,
       elixir: "~> 1.20",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -17,12 +17,12 @@ defmodule Inbox.MixProject do
       package: [
         licenses: ["MIT"],
         links: %{"GitHub" => @source_url},
-        files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md SECURITY.md)
+        files: ~w(lib docs .formatter.exs mix.exs README.md LICENSE CHANGELOG.md SECURITY.md)
       ],
       docs: [
         main: "readme",
         source_url: @source_url,
-        extras: ["README.md", "CHANGELOG.md", "SECURITY.md"]
+        extras: ["README.md", "docs/integration.md", "CHANGELOG.md", "SECURITY.md"]
       ]
     ]
   end

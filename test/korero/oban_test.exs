@@ -1,7 +1,7 @@
-defmodule Inbox.ObanTest do
+defmodule Korero.ObanTest do
   use ExUnit.Case, async: true
 
-  alias Inbox.Test.JobTask
+  alias Korero.Test.JobTask
 
   @operator %{role: :operator}
 
@@ -56,7 +56,7 @@ defmodule Inbox.ObanTest do
 
     # Exercise the real generated worker via Oban's executor without a database.
     # Durable job insertion and transaction semantics belong to host integration tests.
-    Inbox.Test.StartMachineWorker
+    Korero.Test.StartMachineWorker
     |> Oban.Testing.build_job(Ecto.Changeset.get_field(changeset, :args), [])
     |> Oban.Testing.perform_job([])
   end

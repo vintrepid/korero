@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.0-alpha.2 — 2026-09-08
+
+- Rename the public library and OTP app from `inbox` to `korero`, and modules
+  from `Inbox` to `Korero`, without pre-1.0 compatibility aliases.
+- Introduce the conversation, email-client, and task-runner product direction;
+  the current artifact remains a reusable library foundation.
+- Move technical contracts and Oban integration instructions into their own guide.
+- Preserve all 17 native lifecycle and worker behavior tests. Prior release
+  history remains available; publication does not freeze the API.
+
 ## 0.1.0-alpha.1 — 2026-09-08
 
 - Introduce the host-owned `Inbox.Task` Ash fragment and AshStateMachine lifecycle.

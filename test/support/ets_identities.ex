@@ -1,11 +1,11 @@
-defmodule Inbox.Test.PrecheckIdentities do
+defmodule Korero.Test.PrecheckIdentities do
   @moduledoc false
   use Spark.Dsl.Transformer
 
   @impl true
   def transform(dsl) do
     identity = Ash.Resource.Info.identity(dsl, :unique_request_key)
-    identity = %{identity | pre_check_with: Inbox.Test.Domain}
+    identity = %{identity | pre_check_with: Korero.Test.Domain}
 
     {:ok,
      Spark.Dsl.Transformer.replace_entity(
@@ -17,7 +17,7 @@ defmodule Inbox.Test.PrecheckIdentities do
   end
 end
 
-defmodule Inbox.Test.EtsIdentities do
+defmodule Korero.Test.EtsIdentities do
   @moduledoc false
-  use Spark.Dsl.Extension, transformers: [Inbox.Test.PrecheckIdentities]
+  use Spark.Dsl.Extension, transformers: [Korero.Test.PrecheckIdentities]
 end
