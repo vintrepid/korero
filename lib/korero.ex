@@ -1,10 +1,17 @@
 defmodule Korero do
   @moduledoc """
-  A conversation and task-runner library foundation built on Ash and Oban.
+  An embeddable communication and task workspace built on Ash and Oban.
 
-  Korero's direction is an integrated conversation, email-client, and task-runner
-  experience. The current library supplies task lifecycle and native job-action
-  integration, not a finished email client or shared user interface.
+  Korero owns the complete product, including its shared UI: conversations,
+  messages, tasks, channel adapters, files, and navigation through topics,
+  interests, relationships, and events. Email and SMS are delivery channels,
+  not exclusive filing structures. Classification never grants access.
+
+  The current alpha supplies task lifecycle and native job-action integration;
+  the shared UI and wider communication/classification experience remain to be
+  extracted and implemented. Hosts configure identity, permissions, storage,
+  theme, provider credentials, and business-specific actions rather than
+  rebuilding the client.
 
   Add `Korero.Task` as a fragment of a host-owned Ash resource. Use that
   resource's native Ash actions and generated code interfaces. The host supplies

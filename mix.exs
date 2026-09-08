@@ -13,7 +13,7 @@ defmodule Korero.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       hex: [ignore_advisories: ["EEF-CVE-2026-32686"]],
-      description: "An Ash-native task and job queue built on Oban",
+      description: "An embeddable communication and task workspace built on Ash and Oban",
       package: [
         licenses: ["MIT"],
         links: %{"GitHub" => @source_url},
@@ -22,7 +22,13 @@ defmodule Korero.MixProject do
       docs: [
         main: "readme",
         source_url: @source_url,
-        extras: ["README.md", "docs/integration.md", "CHANGELOG.md", "SECURITY.md"]
+        extras: [
+          "README.md",
+          "docs/integration.md",
+          "docs/product-architecture.md",
+          "CHANGELOG.md",
+          "SECURITY.md"
+        ]
       ]
     ]
   end

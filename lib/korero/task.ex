@@ -24,6 +24,13 @@ defmodule Korero.Task do
   delivery and retries; a job's completion does not complete the task unless
   the explicitly configured Ash action does so. Delivery does not make external
   effects atomic or exactly-once. There is no snapshot-restoring undo.
+
+  This task contract is one part of Korero's complete UI-and-communication
+  package, not the product's outer boundary. Future classification connects
+  tasks, conversations, artifacts, topics, interests, and events through
+  many-to-many relationships. The current classification string is a queue
+  hint, not an ontology or an authorization rule. Topic membership never
+  widens participant visibility or grants access to an attached resource.
   """
 
   alias Ash.Error.Changes.InvalidAttribute

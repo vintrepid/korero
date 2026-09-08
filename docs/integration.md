@@ -1,9 +1,14 @@
 # Integration and architecture
 
-Korero is an independent Ash-native task and job queue built on Oban. It combines
-a reusable task lifecycle with AshOban's typed host-action execution. Applications
-keep their own Ash resources, policies, and Oban instance; `Korero.Task` adds the
-shared behavior without creating another job engine.
+Korero owns a complete embeddable communication/workspace experience, including
+the UI. The current alpha implements its task/execution foundation on Ash and
+Oban. This guide documents what is usable today; the broader product and UI
+ownership contract is in [product architecture](product-architecture.md).
+
+Applications retain their identity, policies, persistence, theme, provider
+credentials, and business actions. They should not have to rebuild the shared
+client UI. `Korero.Task` currently adds the reusable task contract and native
+AshOban execution without creating another job engine.
 
 ## Installation
 
@@ -13,7 +18,8 @@ Korero is available independently from Git, or through the AshLotus distribution
 {:korero, github: "vintrepid/korero", tag: "v0.1.0-alpha.2"}
 ```
 
-When using AshLotus, declare only `ash_lotus`; it supplies Korero. Pre-1.0 APIs
+When using AshLotus, it supplies Korero; follow its documented top-level Ash
+override exception when another direct dependency also declares Ash. Pre-1.0 APIs
 may change between releases. Git pins make builds reproducible, not interfaces
 permanent.
 
@@ -169,7 +175,7 @@ end
 ```
 
 The literal actor above is a host-chosen example credential matching the example
-policy, not an Korero default. Real hosts should grant a dedicated worker only its
+policy, not a Korero default. Real hosts should grant a dedicated worker only its
 required reads/actions, or configure an `AshOban.ActorPersister` to reload the
 requesting actor at execution time. Worker authorization must remain enabled;
 policies, tenancy, and actor validity are evaluated when the job runs. Never

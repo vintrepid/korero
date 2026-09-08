@@ -1,9 +1,11 @@
 # Korero Agent Rules
 
-1. Korero is an independent, application-neutral foundation for a conversation,
-   email-client, and task-runner experience, built on Ash, Oban, and AshOban.
-   Its current artifact is a library, not a finished email client. Never include
-   host application data, private paths, credentials, or client policy.
+1. Korero owns the complete, embeddable communication/work experience: UI,
+   messages, tasks, channel adapters, and artifact/classification navigation.
+   It is not merely a queue engine requiring every host to build its own client.
+   The released alpha is still the task/execution foundation; distinguish
+   current capabilities from this product contract. Never include host data,
+   private paths, credentials, or client policy.
 2. Host resources own their domain, data layer, table, tenancy, and authorization.
    Expose reusable lifecycle through native Ash fragments and actions, not copied
    resource implementations or a separate persistence boundary.
@@ -28,3 +30,12 @@
    the README a short product introduction; technical contracts and integration
    instructions belong in `docs/integration.md`. Pre-1.0 publication does not
    freeze the API or imply production readiness.
+10. Organize across topics, interests, relationships, and events, not exclusive
+    folders for email, SMS, tasks, or file types. Classification is many-to-many
+    and never grants access. Preserve source identities, participant visibility,
+    provenance, and explicit sharing boundaries across every derived view.
+11. Korero supplies its own composable UI and installer; hosts provide identity,
+    policies, routing/layout/theme configuration, persistence, credentials, and
+    typed business actions. Keep domain work in Ash actions, thin LiveViews,
+    reusable semantic styling, and Ash-aware Cinder lists. Do not copy shared
+    client logic into each host or make the UI the authority for authorization.
