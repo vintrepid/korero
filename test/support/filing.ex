@@ -21,6 +21,22 @@ defmodule Korero.Test.FilingIdentities do
   use Spark.Dsl.Extension, transformers: [Korero.Test.FilingPrecheckIdentities]
 end
 
+defmodule Korero.Test.OwnFilingCreate do
+  @moduledoc false
+  use Ash.Policy.SimpleCheck
+
+  @impl true
+  def describe(_opts), do: "creating filing state owned by the authenticated actor"
+
+  @impl true
+  def match?(%{id: user_id}, %{changeset: %Ash.Changeset{} = changeset}, _opts)
+      when not is_nil(user_id) do
+    Ash.Changeset.get_attribute(changeset, :user_id) == user_id
+  end
+
+  def match?(_actor, _context, _opts), do: false
+end
+
 defmodule Korero.Test.InboxItemState do
   @moduledoc false
   use Ash.Resource,
@@ -35,7 +51,11 @@ defmodule Korero.Test.InboxItemState do
   end
 
   policies do
-    policy always() do
+    policy action_type(:create) do
+      authorize_if Korero.Test.OwnFilingCreate
+    end
+
+    policy action_type([:read, :update, :destroy]) do
       authorize_if expr(user_id == ^actor(:id))
     end
   end
@@ -55,7 +75,11 @@ defmodule Korero.Test.InboxPreference do
   end
 
   policies do
-    policy always() do
+    policy action_type(:create) do
+      authorize_if Korero.Test.OwnFilingCreate
+    end
+
+    policy action_type([:read, :update, :destroy]) do
       authorize_if expr(user_id == ^actor(:id))
     end
   end
@@ -75,7 +99,11 @@ defmodule Korero.Test.InboxFolder do
   end
 
   policies do
-    policy always() do
+    policy action_type(:create) do
+      authorize_if Korero.Test.OwnFilingCreate
+    end
+
+    policy action_type([:read, :update, :destroy]) do
       authorize_if expr(user_id == ^actor(:id))
     end
   end
