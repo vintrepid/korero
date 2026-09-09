@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Add host-composed personal filing, folders, and Trash-retention preferences.
+- Keep archive, soft Trash, emptied tombstones, and stars separate from task
+  completion and source communication state; protect updates with revisions.
+- Share smart-folder and elapsed-day retention behavior without imposing a
+  repository, source authorization policy, or background worker on hosts.
+
 ## 0.1.0-alpha.2 — 2026-09-08
 
 - Rename the public library and OTP app from `inbox` to `korero`, and modules

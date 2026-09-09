@@ -206,6 +206,41 @@ validation. Neither Oban delivery nor task completion proves exactly-once extern
 effects. See the [native AshOban guide](https://hexdocs.pm/ash_oban/getting-started-with-ash-oban.html)
 for trigger, actor, and host configuration details.
 
+## Personal organization
+
+`Korero.InboxItemState`, `Korero.InboxFolder`, and `Korero.InboxPreference`
+are optional native Ash fragments for host-persisted personal organization.
+The host supplies an authenticated actor with a UUID `id`, its domain/data
+layer, relationships, read policies, and authorization of every source and
+folder reference. Source identity strings are opaque registry keys, never
+module names. A user can organize only sources they are authorized to access.
+
+- Item identity is `(user_id, source_kind, source_id)`. `ensure_source` derives
+  its owner from the actor and preserves existing state on retry, including an
+  emptied tombstone. `trash`, `archive`, `restore`, `star`, `unstar`, `file`, and
+  `empty` are typed resource actions protected by optimistic revisions.
+- Archive retains filed material. Trash removes it from all ordinary views.
+  Empty moves Trash to `purged` but retains the row and source content; normal
+  restore cannot undo it. Physical deletion and privileged recovery are not
+  implemented. A stale empty command cannot overwrite a concurrent restore.
+- Stars are personal bookmarks, independent of read status or task completion.
+  Filing into a personal folder archives that user's item; clearing its folder
+  leaves visibility unchanged. No filing action completes a task or mutates
+  another participant's communication.
+- Preferences default to thirty elapsed days in Trash, with `nil` meaning
+  indefinitely and a validated range of zero through 36,500 days. Hosts run
+  bounded background retention using current preferences and the `empty`
+  action. `Korero.Filing.expired?/3` supplies the exact boundary rule; the
+  fragments themselves do not start a retention worker.
+- `Korero.Filing.folder_keys/1` derives system views from independent queue,
+  visibility, sent, starred, scheduled, and draft facts. Trash and purged items
+  never leak into other system, project, or personal views.
+
+System folders are queries, not user-editable rows. Personal folders provide
+simple named destinations; hierarchies and many-to-many topic/interest/event
+classification remain future separate resources. Neither folders nor tags
+grant access, and neither substitutes for the attached resource's lifecycle.
+
 ## Verification
 
 ```sh
