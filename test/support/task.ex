@@ -89,6 +89,28 @@ defmodule Korero.Test.JobTask do
   end
 end
 
+defmodule Korero.Test.Message do
+  @moduledoc false
+
+  use Ash.Resource,
+    domain: Korero.Test.Domain,
+    data_layer: Ash.DataLayer.Ets,
+    fragments: [Korero.Message]
+
+  ets do
+    private? true
+  end
+
+  actions do
+    defaults [:read, create: [:content, :subject, :distribution_keys]]
+  end
+
+  attributes do
+    uuid_v7_primary_key :id
+    attribute :content, :string, allow_nil?: false, public?: true
+  end
+end
+
 defmodule Korero.Test.Domain do
   @moduledoc false
 
@@ -98,5 +120,6 @@ defmodule Korero.Test.Domain do
     resource Korero.Test.Task
     resource Korero.Test.ProtectedTask
     resource Korero.Test.JobTask
+    resource Korero.Test.Message
   end
 end

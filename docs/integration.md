@@ -33,6 +33,20 @@ state, tasks own work, and an attached resource owns its own domain lifecycle.
 Reading a message never completes its attached task. History is not replayed to
 rebuild current state.
 
+## Message envelopes
+
+`Korero.Message` is an optional Ash fragment for the mutable envelope of a
+host-owned message. It adds `subject`, `distribution_keys`, and the
+`edit_envelope` action. Distribution keys are opaque participant identities;
+the host decides what they mean, who may add them, how recipients are loaded,
+and whether a recipient can read or receive the message. Repeating an edit does
+not duplicate a distribution key, and omitting the subject leaves it unchanged.
+
+The host still owns message content, sender and primary-recipient relationships,
+storage, policies, canonical links, delivery adapters, and delivery audit. The
+fragment deliberately performs no email, text, or app delivery and does not
+complete an attached task.
+
 ## Host resource
 
 Korero supplies Ash 3.33+, AshStateMachine 0.2.13+, Oban 2.23+, and AshOban
