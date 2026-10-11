@@ -19,14 +19,14 @@ defmodule Korero.Task do
 
   Current resource records are authoritative. History is never replayed to
   reconstruct task state. Scheduling dependency relationships and lead/lag,
-  task-level execution attempts, attached-resource dispatch, replication, and
+  task-level execution attempts, replication, and
   semantic journal integration are separate future boundaries. Oban owns job
   delivery and retries; a job's completion does not complete the task unless
   the explicitly configured Ash action does so. Delivery does not make external
   effects atomic or exactly-once. There is no snapshot-restoring undo.
 
   This task contract is one part of Korero's complete UI-and-communication
-  package, not the product's outer boundary. Future classification connects
+  package, not the product's outer boundary. TagAsh-backed classification connects
   tasks, conversations, artifacts, topics, interests, and events through
   many-to-many relationships. The current classification string is a queue
   hint, not an ontology or an authorization rule. Topic membership never

@@ -5,16 +5,19 @@
 Kōrero is being built as a complete, task-oriented communication workspace
 you can drop into your app—UI included.
 
-The familiarity of an email client, with a task runner underneath. Read,
-reply, follow up, and get things done without losing the conversation.
+A task runner with the familiarity of an Inbox. Messages are a simple kind of
+task; reading them is separate from completing the work they request.
 
 Email is only the beginning. SMS, messages, files, and other communication
 belong together, organized around topics, interests, and events—not separated
 into silos by file type or delivery channel. Folders evolve into a way to
 explore those connections: a Finder for what things are about.
 
-**Early alpha:** the task/execution foundation is available; the shared UI and
-broader communication workspace are still being built.
+**Early alpha:** native Ash task lifecycle and registered command dispatch,
+per-app/per-user channels, TagAsh-backed classification and shared Inbox
+components are being extracted copy-first from Calvin. Apps own their message
+implementations, permissions and credentials. No email account or worker is
+automatically configured. The broader communication workspace is still evolving.
 
 ```elixir
 {:korero, github: "vintrepid/korero", tag: "v0.1.0-alpha.2"}

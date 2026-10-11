@@ -1,8 +1,8 @@
 # Integration and architecture
 
 Korero owns a complete embeddable communication/workspace experience, including
-the UI. The current alpha implements its task/execution foundation on Ash and
-Oban. This guide documents what is usable today; the broader product and UI
+the UI. Its primary model is a task runner; messages are degenerate tasks.
+This guide documents the current extraction branch; the broader product and UI
 ownership contract is in [product architecture](product-architecture.md).
 
 Applications retain their identity, policies, persistence, theme, provider
@@ -30,14 +30,56 @@ assignment, priority, scheduling fields, idempotent requests, and optimistic
 revisions, and opt-in native AshOban triggers. Oban owns job delivery and retries;
 hosts explicitly select which Ash actions are executable. Korero does not yet
 dispatch attached domain actions, implement scheduling dependencies, record
-task-level attempts, replicate tasks, provide a shared UI, or integrate a
+task-level attempts, replicate tasks, or integrate a
 semantic journal. No worker starts merely because Korero is a dependency, and
 human tasks are not automatically executed or completed.
 
 The task's current Ash record is authoritative. Messages own communication
 state, tasks own work, and an attached resource owns its own domain lifecycle.
 Reading a message never completes its attached task. History is not replayed to
-rebuild current state.
+rebuild current state. The extraction adds shared presentation, URL state,
+trusted dispatch, personal channel configuration and TagAsh classification;
+it does not replace Calvin's production adapters or infer provider accounts.
+
+## Shared client extraction
+
+`Korero.Client.Threads.build/1` groups already-authorized occurrences by source
+thread and visibility, preserving separate active/archive/trash occurrences and
+task priority. `Korero.Client.State.select/2` chooses only authorized folders and
+loaded threads. `State.path/3` and `State.criteria/1` keep workflow, participant,
+folder and cursor filters in the URL. `Korero.Client.Cursor` supplies bounded,
+folder-bound keyset cursor serialization; a cursor is never an access grant.
+
+`Korero.Phoenix.Components.workspace/1` supplies the shared navigation/queue/focus
+client extracted copy-first from Calvin. Pass `client`, selected `state` and a
+local `inbox_path`; import `../../deps/korero/priv/korero.css` in the host's CSS.
+Host slots supply typed business actions, message composition, rich text and
+classification. The host supplies an actor-authorized, bounded source projection,
+layout, subscriptions and a thin LiveView adapter. No source query, role bypass,
+credential, or host-specific execution heuristic was copied into presentation.
+Calvin's current files/routes remain intact; switching its adapters is a separate
+verified integration, not a destructive extraction step.
+
+## Native installer
+
+With Igniter present, `mix korero.install` creates host-owned Task, Message,
+Channel and personal filing resources, registers the domain/repository and
+schedules `ash.codegen install_korero`. It never migrates a database or starts
+workers. Apply and review the generated production migration with the host's
+normal Ash workflow.
+
+To mount an existing authenticated host adapter for the shared client:
+
+```sh
+mix korero.install --live-view MyAppWeb.InboxLive \
+  --on-mount MyAppWeb.LiveUserAuth:live_user_required --path /inbox
+```
+
+User resource, repository, domain and router are configurable. Existing files
+are preserved; repeat installation does not claim unverified routes are private.
+An installer cannot invent identity policies, channel providers or a placeholder
+client and call them a completed integration. AshLotus delegates to this native
+installer rather than maintaining another implementation.
 
 ## Message envelopes
 
@@ -52,6 +94,85 @@ The host still owns message content, sender and primary-recipient relationships,
 storage, policies, canonical links, delivery adapters, and delivery audit. The
 fragment deliberately performs no email, text, or app delivery and does not
 complete an attached task.
+
+A message is a degenerate task: a host can compose `Korero.Task` and
+`Korero.Message` on the same resource. Envelope edits remain communication
+changes, not completion. Existing hosts may keep separate communication and
+work occurrences without migrating them merely to use the client.
+
+## Personal channels
+
+`Korero.Channel` is a native Ash fragment for app-and-user-owned configuration.
+The host resource implements `c:Korero.Scope.korero_app_key/0`, returning a stable
+application key such as `"example"`; it supplies storage and authorization policies.
+The fragment derives `user_id` from the authenticated UUID actor, never a form.
+The `(app_key, user_id, key)` identity is immutable. Native reads always apply
+that scope; updates reject another actor or application even when a caller
+has disabled host policies.
+Set `primary_read_warning?: false` on this host resource: its primary-read
+scope preparation is intentional, including relationship reads.
+
+`configure` creates idempotently and preserves existing configuration on retry.
+Use `update_configuration` for deliberate changes with optimistic revision
+checks. Channel kind is `:app`, `:email`, or `:sms`; the record stores its label,
+address, enabled status, trusted provider registry key, and an optional opaque
+secret-store reference like `"vault:credential-identity"`. It stores no provider
+password or token. Provider keys are not executable modules. Host delivery must
+reload and authorize the selected user's channel and resolve its secret reference
+through the host's trusted secret store. An app's notification mailer is not
+implicitly a person's email account. No delivery adapter or worker is started
+by this fragment.
+
+## Classification with TagAsh
+
+`Korero.Classification` is a native Ash action fragment. Its host resource
+implements `korero_app_key/0` and `korero_subject_authorizer/0`; the latter returns
+a trusted `Korero.Classification.SubjectAuthorizer` module. That callback must
+authorize the stable `TagAsh.SubjectRef` through the host's source registry and
+native Ash policies for every read or classification mutation. It receives the
+actor, application key, tenant, and requested operation. It must not resolve
+reference strings into modules.
+
+The `classify` action accepts a subject reference, context key, tag name and
+slug. It calls TagAsh's native context/tag upsert and assignment attach actions,
+with authorization enabled and the actor and tenant preserved. Context ownership
+is an opaque reference derived from application and actor identity; neither a
+different owner nor an existing tag ID can be supplied as input. Assignments
+record human provenance. `classifications` reauthorizes the subject and filters
+assignments by that exact app/user context before returning tag summaries.
+Tags never grant visibility or execute/complete work.
+
+By default the backend is `TagAsh.Resources.Context`, `Tag`, and `SubjectTag`.
+A trusted host can provide `korero_tag_resources/0` returning a map with
+`:context`, `:tag`, and `:assignment` resources honoring those native action
+contracts, for example to add tenancy and policies. This is not a new tagging
+engine. Direct access to TagAsh's default resources requires host safeguards;
+Korero's facade does not install authorization on those resources. Classification
+does not promise a cross-resource transaction or encrypt subject metadata.
+
+## Attached execution boundary
+
+The existing attached-task completion rejection remains intentional. A safe
+runner requires a trusted versioned task-type/target registry, typed target
+arguments derived from authorized source records, source/target/assignee checks,
+and a declared host transaction across its touched resources. The target action
+must enforce its own policies. A generic bypass flag or a persisted module/action
+string is not that contract. Host delivery must be durable post-commit work;
+neither job success nor SMTP acceptance proves exactly-once effects or completion
+of the invitation's requested reading.
+
+`Korero.Runner` adds native `run_task` dispatch. Implement
+`korero_task_resource/0` and `korero_task_actions/0` on its host resource. The
+second callback returns a trusted static map, for example
+`%{{"reading.article_invitation", 1} => {MyApp.Commands, :run_invitation}}`.
+Callers supply only `task_id` and optionally `expected_revision`; the registered
+generic Ash command must accept `task_id`, and must accept/enforce
+`expected_revision` when stale-intent checks are requested. Korero authorizes the
+task read and forwards actor and tenant with authorization enabled. Unknown
+type/version and stale revision fail closed. No module/action string is resolved.
+The selected command must reauthorize task/source/target **inside its own declared
+transaction**, enforce revisions and persist immutable idempotent outcomes.
+Dispatch alone changes neither the task nor its target.
 
 ## Host resource
 

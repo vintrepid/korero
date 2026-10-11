@@ -21,8 +21,15 @@ Report vulnerabilities through [GitHub private vulnerability reporting](https://
 Do not include credentials, private host data, or
 exploit material in public issues.
 
-Decimal is constrained to `>= 3.0.0 and < 4.0.0`. The
-[upstream advisory](https://github.com/ericmj/decimal/security/advisories/GHSA-rhv4-8758-jx7v)
-identifies 3.0.0 as patched for CVE-2026-32686, while the current advisory feed
-marks every version affected. The audit therefore acknowledges only
-`EEF-CVE-2026-32686`; all other advisories remain failures.
+Ash is constrained to `>= 3.34.6` within the 3.x line, covering the October 2026
+private-argument, related-policy, atom-filter and field-policy fixes. Decimal is
+constrained to `~> 3.1.2`, including the rounding-allocation fix. Host Git overrides
+must include these fixes too; Hex audit cannot certify an old Git fork.
+
+No dependency advisories are ignored. Run `mix precommit` to audit the locked
+dependencies before loading applications, then verify the native contracts.
+
+Classification reauthorizes each subject through a trusted host source registry.
+Raw TagAsh resources require separate host safeguards and must not be exposed as
+untrusted APIs or administration routes. Personal tag context, folder membership,
+or classification never grants source visibility or permission to execute work.

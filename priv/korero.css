@@ -1,0 +1,40 @@
+/* Scoped focus/queue presentation extracted from Calvin's semantic Inbox.
+ * No host reset, framework utility plugin, or application-wide theme is installed. */
+.korero-inbox { --korero-surface: var(--color-base-100, #fff); --korero-ink: var(--color-base-content, #172630); --korero-muted: color-mix(in srgb, var(--korero-ink) 65%, transparent); --korero-border: color-mix(in srgb, var(--korero-ink) 15%, transparent); color: var(--korero-ink); }
+.korero-inbox__header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 0; }
+.korero-inbox h1 { margin: 0; font-size: 1.65rem; font-weight: 750; letter-spacing: -.025em; }
+.korero-inbox h2 { font-size: 1.1rem; font-weight: 700; }
+.korero-inbox__kicker { margin: 0 0 .25rem; color: var(--korero-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; }
+.korero-inbox__toolbar, .korero-inbox__toolbar form { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; }
+.korero-inbox__toolbar label { display: grid; gap: .25rem; font-size: .75rem; }
+.korero-inbox button, .korero-inbox select { border: 1px solid var(--korero-border); border-radius: .55rem; padding: .5rem .75rem; background: var(--korero-surface); color: var(--korero-ink); font: inherit; }
+.korero-inbox button { cursor: pointer; }
+.korero-inbox button:hover, .korero-inbox__folder:hover { background: color-mix(in srgb, var(--korero-ink) 6%, var(--korero-surface)); }
+.korero-inbox :is(a, button, select):focus-visible { outline: 2px solid var(--korero-ink); outline-offset: 3px; }
+.korero-workspace { display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(15rem, 23rem) minmax(0, 1fr); min-height: 60vh; border: 1px solid var(--korero-border); border-radius: 1rem; overflow: hidden; background: var(--korero-surface); }
+.korero-workspace[data-navigation="closed"] { grid-template-columns: 3.5rem minmax(15rem, 23rem) minmax(0, 1fr); }
+.korero-workspace[data-navigation="closed"] #inbox-folder-list { display: none; }
+.korero-workspace [data-workspace="navigation"], .korero-workspace [data-workspace="queue"] { min-width: 0; border-right: 1px solid var(--korero-border); }
+.korero-workspace [data-workspace="navigation"] { padding: .6rem; }
+.korero-workspace [data-workspace="focus"] { min-width: 0; padding: 1.25rem; }
+.korero-inbox__folder { display: flex; justify-content: space-between; gap: .5rem; padding: .6rem .65rem; border-radius: .5rem; color: inherit; text-decoration: none; }
+.korero-inbox__folder[aria-current="page"] { background: color-mix(in srgb, var(--korero-ink) 10%, var(--korero-surface)); font-weight: 700; }
+.korero-workspace-item { display: grid; gap: .3rem; padding: 1rem; border-bottom: 1px solid var(--korero-border); color: inherit; text-decoration: none; transition: background-color 140ms ease; }
+.korero-workspace-item:hover { background: color-mix(in srgb, var(--korero-ink) 4%, var(--korero-surface)); }
+.korero-workspace-item[data-selected="true"] { background: color-mix(in srgb, var(--korero-ink) 8%, var(--korero-surface)); box-shadow: inset 3px 0 var(--korero-ink); }
+.korero-workspace-item[data-deferred="true"] { color: var(--korero-muted); }
+.korero-workspace-item [data-slot="heading"], .korero-workspace-item [data-slot="title"], .korero-inbox__entry header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.korero-workspace-item [data-slot="heading"], .korero-workspace-item [data-slot="metadata"], .korero-inbox__entry footer { font-size: .72rem; color: var(--korero-muted); }
+.korero-workspace-item [data-slot="metadata"], .korero-inbox__entry footer { display: flex; flex-wrap: wrap; gap: .5rem; }
+.korero-workspace-item [data-slot="title"] { justify-content: start; font-weight: 700; }
+.korero-workspace-item [data-slot="title"] p { margin: 0; flex: 1; }
+.korero-workspace-item [data-slot="preview"] { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: .85rem; color: var(--korero-muted); }
+.korero-workspace-item [data-slot="unread"] { width: .4rem; height: .4rem; border-radius: 50%; background: currentColor; }
+.korero-inbox__badge { font-size: .7rem; }
+.korero-inbox__entry { padding: 1rem 0; border-bottom: 1px solid var(--korero-border); }
+.korero-inbox__entry p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.korero-inbox__focus-header { padding-bottom: .75rem; border-bottom: 1px solid var(--korero-border); }
+.korero-inbox__empty { padding: 1.5rem; color: var(--korero-muted); }
+.korero-inbox #inbox-pagination { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem; font-size: .85rem; }
+.korero-inbox #inbox-pagination a { color: inherit; }
+@media (max-width: 950px) { .korero-workspace, .korero-workspace[data-navigation="closed"] { grid-template-columns: minmax(0, 1fr); } .korero-workspace [data-workspace="navigation"], .korero-workspace [data-workspace="queue"] { border-right: 0; border-bottom: 1px solid var(--korero-border); } .korero-workspace[data-navigation="closed"] [data-workspace="navigation"] { padding: .4rem; } .korero-workspace [data-workspace="queue"] { max-height: 45vh; overflow: auto; } }

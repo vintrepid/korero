@@ -5,8 +5,11 @@
 Korero is the embeddable client as well as the workflow engine. Installing and
 configuring it should provide the shared UI, messages, tasks, and communication
 experience—not a collection of backend pieces that every application must turn
-into its own email client. The present alpha only supplies the task/execution
-foundation; this document records the boundary we are building toward.
+into its own email client. The current copy-first extraction includes task
+lifecycle and trusted dispatch, personal channels, TagAsh-backed classification,
+and shared navigation/queue/focus presentation and URL state. Full provider and
+business adapters remain host integrations; this document records the broader
+boundary we are building toward. Calvin's existing copies remain operational.
 
 Email-client familiarity is a starting point, not a limit. SMS, in-app messages,
 voice recordings, files, and future channels belong in one workspace. A person
@@ -33,6 +36,8 @@ These names identify distinct concerns, not a mandate for one generic table:
   replies, and thread relationships. Delivery attempts belong to channels.
 - **Task:** requested work, lifecycle, assignment, schedule, and outcome.
   An attached resource retains its typed domain actions and authorization.
+  This is the primary execution model; messages are degenerate tasks, not a
+  second task runner. Their communication, delivery and read facts stay distinct.
 - **Artifact:** a file, recording, or other content with provenance, versions,
   storage references, and access controls. A transcript is not its original audio.
 - **Topic/interest:** a concept or a person's interest in it, connected through
@@ -52,6 +57,10 @@ Korero owns the reusable client UI, interaction model, message/task contracts,
 channel-adapter contracts, and artifact/classification navigation. The host
 supplies identity, authorization, tenancy, persistence configuration, provider
 credentials, branding/theme, mount points, and typed business actions.
+Channel identity and configuration are application-specific and user-specific:
+one person's email account is never another person's email account. Generic
+hierarchical tagging belongs to TagAsh; Korero authorizes and classifies subjects
+through that library rather than owning a competing tagging model.
 
 The UI should be composed from reusable semantic components and app-level theme
 tokens, with Ash-aware Cinder lists where sorting/filtering/tabular interaction

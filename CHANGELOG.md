@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Extract Calvin's Inbox presentation, thread grouping, URL state and cursors
+  copy-first, retaining Calvin's operational copies and host-specific adapters.
+- Add trusted versioned native task dispatch, app/user-scoped channels, and
+  subject-authorized classification backed by the separate TagAsh library.
+- Add an idempotent native installer for private host resources, explicit
+  authenticated routes and Ash code generation, with no implicit provider or jobs.
+- Verify 58 native/core/client/installer tests and patched Ash/Decimal security
+  floors through `mix precommit`; no advisory suppressions remain.
 - Add host-composed personal filing, folders, and Trash-retention preferences.
 - Keep archive, soft Trash, emptied tombstones, and stars separate from task
   completion and source communication state; protect updates with revisions.

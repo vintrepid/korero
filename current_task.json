@@ -1,0 +1,18 @@
+{
+  "repository": "/Users/vince/dev/korero",
+  "checkout": "/Users/vince/dev/korero",
+  "branch": "feature/korero/workspace-install",
+  "base_branch": "main",
+  "owner": "Codex",
+  "status": "ready_for_review",
+  "checkout_exception": null,
+  "objective": "Extract Korero copy-first from Calvin as a task runner with degenerate message tasks, app/user-owned channels, a separate TagAsh classifier, shared client and native installer. Retain uncertain Calvin duplicates operationally.",
+  "handoff": "Verify and publish library branches, then pin and verify consumer integration; no deployment authorized.",
+  "already_shared": ["Korero.Task", "Korero.Message", "Korero.InboxItemState", "Korero.InboxFolder", "Korero.InboxPreference", "Korero.Filing"],
+  "extraction_sources": ["CalvinWeb.MessagingLive.Inbox", "CalvinWeb.Components.InboxComponents", "Calvin.Messaging.UnifiedInbox", "Calvin.Messaging.InboxActions", "Calvin.Messaging.InboxQuery", "Calvin.Messaging.InboxPresentation"],
+  "shared_contracts": ["Native Task lifecycle and Task+Message composition", "Trusted versioned Runner dispatch preserving actor and tenant", "Immutable per-app/per-user Channel scope", "Native TagAsh classification with reauthorized subjects", "Inbox workspace/thread presentation and host composition slots", "URL-backed participant/workflow/folder/thread/cursor state", "Existing personal filing fragments"],
+  "host_boundaries": ["Identity, authorization, tenancy and repositories", "Calvin guide/departure/scheduling/payroll integrations", "Production synchronization, review and error automation", "Delivery credentials and existing Oban instance", "Layout, theme and resource subscriptions"],
+  "acceptance": ["Calvin remains unchanged and operational with duplicate implementations retained", "Dabhand mounts the extracted shared client on authorized host resources", "Filters update URLs and survive reload", "Actor/app channels cannot be forged or cross-read", "Classification never grants visibility or completes work", "Message acknowledgement never completes attached work", "Runner only dispatches registered task type/version through native authorized Ash actions", "Repeated native installation does not duplicate routes/resources/codegen", "Ash generates host migrations; no copied Calvin data or handwritten Ash table migrations"],
+  "verification": {"entry_point": "mix precommit", "synthetic_acceptance_tests": 58, "hex_audit": "patched Ash 3.34.6 and Decimal 3.1.2; no ignored advisories", "consumer_workflow": "Dabhand database-backed integration verification tracked in consumer task"},
+  "deployment_status": "Not deployed"
+}

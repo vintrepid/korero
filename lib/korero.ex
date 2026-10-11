@@ -1,17 +1,23 @@
 defmodule Korero do
   @moduledoc """
-  An embeddable communication and task workspace built on Ash and Oban.
+  An embeddable task runner and communication workspace built on Ash and Oban.
 
   Korero owns the complete product, including its shared UI: conversations,
   messages, tasks, channel adapters, files, and navigation through topics,
   interests, relationships, and events. Email and SMS are delivery channels,
   not exclusive filing structures. Classification never grants access.
 
-  The current alpha supplies task lifecycle and native job-action integration;
-  the shared UI and wider communication/classification experience remain to be
-  extracted and implemented. Hosts configure identity, permissions, storage,
-  theme, provider credentials, and business-specific actions rather than
-  rebuilding the client.
+  Messages are degenerate tasks: compose the task and message fragments on one
+  resource without conflating work completion, delivery or acknowledgement.
+  Applications and their users configure their own channels and credentials;
+  an application's notification mailer is not a user's email account.
+
+  The extraction supplies native task lifecycle, trusted versioned dispatch,
+  personal channels, a TagAsh-backed classifier, and composable Inbox workspace
+  presentation and URL state copied from Calvin. Calvin's implementation stays
+  alongside it. Full rich-text, provider and domain adapters are not implicitly
+  installed. Hosts configure identity, permissions, storage, theme, message
+  implementations and typed business-specific commands.
 
   Add `Korero.Task` as a fragment of a host-owned Ash resource. Use that
   resource's native Ash actions and generated code interfaces. The host supplies
