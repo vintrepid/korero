@@ -43,6 +43,7 @@ defmodule Korero.Channel do
 
   changes do
     change &Korero.Scope.own/2, on: [:create, :update]
+    change before_action(&Korero.Scope.validate_channel_scope/2), on: [:create, :update]
     change optimistic_lock(:revision), on: :update
   end
 

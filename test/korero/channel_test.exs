@@ -120,6 +120,74 @@ defmodule Korero.ChannelTest do
     assert Ash.get!(Channel, own.id, actor: owner).label == own.label
   end
 
+  test "immutable scope cannot be changed after constructing an authorized changeset", %{
+    owner: owner,
+    stranger: stranger
+  } do
+    own = configure!(owner)
+
+    for authorize? <- [true, false],
+        {attribute, forged} <- [
+          id: Ash.UUID.generate(),
+          user_id: stranger.id,
+          app_key: "other_app",
+          key: "another_key"
+        ] do
+      changeset =
+        own
+        |> Ash.Changeset.for_update(:update_configuration, %{label: "Forged scope"}, actor: owner)
+        |> Ash.Changeset.force_change_attribute(attribute, forged)
+
+      assert {:error, _} = Ash.update(changeset, actor: owner, authorize?: authorize?)
+    end
+
+    persisted = Ash.get!(Channel, own.id, actor: owner)
+
+    assert Map.take(persisted, [:id, :user_id, :app_key, :key, :label, :revision]) ==
+             Map.take(own, [:id, :user_id, :app_key, :key, :label, :revision])
+  end
+
+  test "creation cannot force another scope after deriving actor ownership", %{
+    owner: owner,
+    stranger: stranger
+  } do
+    for {attribute, forged} <- [user_id: stranger.id, app_key: "other_app"] do
+      changeset =
+        Channel
+        |> Ash.Changeset.for_create(:configure, attributes(), actor: owner)
+        |> Ash.Changeset.force_change_attribute(attribute, forged)
+
+      assert {:error, _} = Ash.create(changeset, actor: owner, authorize?: false)
+    end
+
+    assert Ash.read!(Channel, actor: owner) == []
+    assert Ash.read!(Channel, actor: stranger) == []
+  end
+
+  test "scope validation uses the execution actor rather than the changeset construction actor",
+       %{
+         owner: owner,
+         stranger: stranger
+       } do
+    own = configure!(owner)
+
+    changeset =
+      Ash.Changeset.for_update(own, :update_configuration, %{label: "Changed actor"},
+        actor: owner
+      )
+
+    assert {:error, _} = Ash.update(changeset, actor: stranger, authorize?: false)
+
+    create =
+      Ash.Changeset.for_create(Channel, :configure, Map.put(attributes(), :key, "new_key"),
+        actor: owner
+      )
+
+    assert {:error, _} = Ash.create(create, actor: stranger, authorize?: false)
+    assert Ash.get!(Channel, own.id, actor: owner).label == own.label
+    assert Ash.read!(Channel, actor: stranger) == []
+  end
+
   defp configure!(actor, changes \\ %{}),
     do: Ash.create!(Channel, Map.merge(attributes(), changes), action: :configure, actor: actor)
 

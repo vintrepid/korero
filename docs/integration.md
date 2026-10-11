@@ -179,7 +179,7 @@ Dispatch alone changes neither the task nor its target.
 
 ## Host resource
 
-Korero supplies Ash 3.33+, AshStateMachine 0.2.13+, Oban 2.23+, and AshOban
+Korero supplies Ash 3.34.6+, AshStateMachine 0.2.13+, Oban 2.23+, and AshOban
 0.8.14+ within the dependency ranges in `mix.exs`. A host resource supplies its
 static domain, storage, authorization, and tenancy:
 
