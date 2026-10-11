@@ -374,6 +374,18 @@ if Code.ensure_loaded?(Igniter) do
     defp filing_body(options, fragment) do
       table = Macro.underscore(fragment) <> "s"
 
+      description =
+        case fragment do
+          "InboxFolder" ->
+            "Host-owned personal Inbox folders, with access scoped to the current actor."
+
+          "InboxPreference" ->
+            "Host-owned per-user Inbox presentation preferences, with actor-scoped access."
+
+          "InboxItemState" ->
+            "Host-owned per-user filing and presentation state for authorized Inbox sources."
+        end
+
       references =
         if fragment == "InboxItemState" do
           """
@@ -382,6 +394,7 @@ if Code.ensure_loaded?(Igniter) do
           end
 
           @doc false
+          @spec authorize_references(Ash.Changeset.t(), Ash.Resource.Change.Context.t()) :: Ash.Changeset.t()
           def authorize_references(changeset, context) do
             context = %{context | actor: get_in(changeset.context, [:private, :actor]), tenant: changeset.tenant}
             source_kind = Ash.Changeset.get_attribute(changeset, :source_kind)
@@ -418,7 +431,8 @@ if Code.ensure_loaded?(Igniter) do
           ""
         end
 
-      resource_header(options, ["Korero." <> fragment], table) <>
+      "@moduledoc #{inspect(description)}\n\n" <>
+        resource_header(options, ["Korero." <> fragment], table) <>
         """
         relationships do
           belongs_to :user, #{inspect(options.user)} do

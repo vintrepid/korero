@@ -48,6 +48,35 @@ defmodule Korero.InstallTest do
     assert second.tasks == []
   end
 
+  test "generated personal filing resources include accurate module docs and native callback spec" do
+    igniter = install(["--yes"])
+    assert igniter.issues == []
+
+    for {name, purpose} <- [
+          {"inbox_folder", "Host-owned personal Inbox folders"},
+          {"inbox_preference", "Host-owned per-user Inbox presentation preferences"},
+          {"inbox_item_state", "Host-owned per-user filing and presentation state"}
+        ] do
+      content =
+        igniter.rewrite
+        |> Rewrite.source!("lib/korero_install_fixture/korero/#{name}.ex")
+        |> Rewrite.Source.get(:content)
+
+      assert content =~ "@moduledoc"
+      assert content =~ purpose
+    end
+
+    state =
+      igniter.rewrite
+      |> Rewrite.source!("lib/korero_install_fixture/korero/inbox_item_state.ex")
+      |> Rewrite.Source.get(:content)
+
+    assert state =~
+             "@spec authorize_references(Ash.Changeset.t(), Ash.Resource.Change.Context.t())"
+
+    assert state =~ ~r/::\s+Ash\.Changeset\.t\(\)/
+  end
+
   test "route configuration must name an existing live view and authenticated hook" do
     for argv <- [
           ["--live-view", "KoreroInstallFixtureWeb.InboxLive", "--yes"],
