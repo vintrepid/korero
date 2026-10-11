@@ -383,6 +383,7 @@ if Code.ensure_loaded?(Igniter) do
 
           @doc false
           def authorize_references(changeset, context) do
+            context = %{context | actor: get_in(changeset.context, [:private, :actor]), tenant: changeset.tenant}
             source_kind = Ash.Changeset.get_attribute(changeset, :source_kind)
             source_id = Ash.Changeset.get_attribute(changeset, :source_id)
             folder_id = Ash.Changeset.get_attribute(changeset, :folder_id)
@@ -391,7 +392,9 @@ if Code.ensure_loaded?(Igniter) do
             # with explicit authorized host resources, never module-from-string dispatch.
             source = Map.get(%{"task" => #{inspect(options.task_resource)}, "message" => #{inspect(options.message_resource)}}, source_kind)
 
-            with true <- not is_nil(source),
+            with %{id: actor_id} <- context.actor,
+                 true <- Ash.Changeset.get_attribute(changeset, :user_id) == actor_id,
+                 true <- not is_nil(source),
                  {:ok, source_id} <- Ash.Type.cast_input(:uuid, source_id),
                  {:ok, %{id: ^source_id}} <- Ash.get(source, source_id, actor: context.actor, tenant: context.tenant, authorize?: true),
                  :ok <- authorize_folder(folder_id, context) do

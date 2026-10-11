@@ -272,6 +272,23 @@ defmodule Korero.InstallTest do
     assert folder_id == folder.id
     state = Ash.get!(KoreroInstallFixture.Korero.InboxItemState, state.id, actor: owner)
 
+    for execution_actor <- [stranger, nil] do
+      filing =
+        Ash.Changeset.for_update(state, :file, %{folder_id: folder.id}, actor: owner)
+
+      assert {:error, _} = Ash.update(filing, actor: execution_actor, authorize?: false)
+
+      creation =
+        Ash.Changeset.for_create(
+          KoreroInstallFixture.Korero.InboxItemState,
+          :ensure_source,
+          %{source_kind: "message", source_id: message.id},
+          actor: owner
+        )
+
+      assert {:error, _} = Ash.create(creation, actor: execution_actor, authorize?: false)
+    end
+
     assert {:error, _} =
              Ash.update(state, %{folder_id: foreign_folder.id}, action: :file, actor: owner)
 
