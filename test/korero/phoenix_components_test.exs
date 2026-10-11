@@ -40,6 +40,30 @@ defmodule Korero.Phoenix.ComponentsTest do
     assert LazyHTML.query(doc, "#inbox-next-page") |> LazyHTML.to_tree() != []
   end
 
+  test "workflow filtering remains available without configurable participant access" do
+    client = %{
+      filter: %{
+        configurable?: false,
+        workflow: "reading",
+        participant_options: [%{value: "all", label: "Everyone"}],
+        workflow_options: [%{value: "reading", label: "Article invitations"}]
+      },
+      folders: [%{key: "inbox", label: "Inbox", count: 0}],
+      threads: []
+    }
+
+    html =
+      render_component(&Korero.Phoenix.Components.workspace/1,
+        client: client,
+        state: Korero.Client.State.select(client, %{}),
+        inbox_path: "/inbox"
+      )
+
+    doc = LazyHTML.from_fragment(html)
+    assert LazyHTML.query(doc, "#inbox-workflow") |> LazyHTML.to_tree() != []
+    assert LazyHTML.query(doc, "#inbox-participant") |> LazyHTML.to_tree() == []
+  end
+
   defp thread do
     entry = %{
       source_kind: "message",

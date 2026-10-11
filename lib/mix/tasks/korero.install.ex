@@ -35,6 +35,9 @@ if Code.ensure_loaded?(Igniter) do
           user_resource: :string,
           repo: :string,
           domain: :string,
+          task_resource: :string,
+          message_resource: :string,
+          channel_resource: :string,
           router: :string,
           path: :string,
           live_view: :string,
@@ -75,6 +78,14 @@ if Code.ensure_loaded?(Igniter) do
       {igniter, repo} = module_option(igniter, argv[:repo], "Repo")
       {igniter, domain} = module_option(igniter, argv[:domain], "Korero")
 
+      {igniter, task_resource} = resource_option(igniter, argv[:task_resource], domain, "Task")
+
+      {igniter, message_resource} =
+        resource_option(igniter, argv[:message_resource], domain, "Message")
+
+      {igniter, channel_resource} =
+        resource_option(igniter, argv[:channel_resource], domain, "Channel")
+
       router_default = inspect(Igniter.Project.Module.module_name(igniter, "Web.Router"))
       router_default = String.replace_suffix(router_default, ".Web.Router", "Web.Router")
       {igniter, router} = module_option(igniter, argv[:router] || router_default, nil)
@@ -112,12 +123,19 @@ if Code.ensure_loaded?(Igniter) do
          user: user,
          repo: repo,
          domain: domain,
+         task_resource: task_resource,
+         message_resource: message_resource,
+         channel_resource: channel_resource,
          router: router,
          live_view: live_view,
          hook: hook,
          path: path
        }}
     end
+
+    defp resource_option(igniter, nil, nil, _name), do: {igniter, nil}
+    defp resource_option(igniter, nil, domain, name), do: {igniter, Module.concat(domain, name)}
+    defp resource_option(igniter, value, _domain, _name), do: module_option(igniter, value, nil)
 
     defp module_option(igniter, nil, nil), do: {igniter, nil}
 
@@ -172,16 +190,17 @@ if Code.ensure_loaded?(Igniter) do
         end
 
       resources = [
-        {"Task", task_body(options, false)},
-        {"Message", task_body(options, true)},
-        {"Channel", channel_body(options)},
-        {"InboxFolder", filing_body(options, "InboxFolder")},
-        {"InboxPreference", filing_body(options, "InboxPreference")},
-        {"InboxItemState", filing_body(options, "InboxItemState")}
+        {options.task_resource,
+         task_body(options, options.task_resource == options.message_resource)},
+        {options.message_resource, task_body(options, true)},
+        {options.channel_resource, channel_body(options)},
+        {Module.concat(options.domain, "InboxFolder"), filing_body(options, "InboxFolder")},
+        {Module.concat(options.domain, "InboxPreference"),
+         filing_body(options, "InboxPreference")},
+        {Module.concat(options.domain, "InboxItemState"), filing_body(options, "InboxItemState")}
       ]
 
-      Enum.reduce(resources, igniter, fn {name, body}, acc ->
-        module = Module.concat(options.domain, name)
+      Enum.reduce(resources, igniter, fn {module, body}, acc ->
         {exists?, acc} = Igniter.Project.Module.module_exists(acc, module)
 
         acc =
@@ -370,7 +389,7 @@ if Code.ensure_loaded?(Igniter) do
 
             # This trusted registry is deliberately local and static. Extend it
             # with explicit authorized host resources, never module-from-string dispatch.
-            source = Map.get(%{"task" => #{inspect(options.domain)}.Task, "message" => #{inspect(options.domain)}.Message}, source_kind)
+            source = Map.get(%{"task" => #{inspect(options.task_resource)}, "message" => #{inspect(options.message_resource)}}, source_kind)
 
             with true <- not is_nil(source),
                  {:ok, source_id} <- Ash.Type.cast_input(:uuid, source_id),
@@ -456,7 +475,7 @@ if Code.ensure_loaded?(Igniter) do
 
       case existing do
         {:ok, cursor} ->
-          if Igniter.Code.Function.argument_equals?(cursor, 1, options.live_view) &&
+          if route_view_matches?(cursor, options.live_view) &&
                authenticated_ancestor?(cursor, options.hook) do
             igniter
           else
@@ -499,17 +518,53 @@ if Code.ensure_loaded?(Igniter) do
     defp authenticated_ancestor?(nil, _hook), do: false
 
     defp authenticated_ancestor?(cursor, hook) do
-      if Igniter.Code.Function.function_call?(cursor, :live_session, [2, 3]) do
-        expected = Sourceror.parse_string!("[{#{inspect(hook.module)}, :#{hook.argument}}]")
+      if Igniter.Code.Function.function_call?(cursor, :live_session, [2, 3]) or
+           Igniter.Code.Function.function_call?(cursor, :ash_authentication_live_session, [2, 3]) do
+        expected = Sourceror.parse_string!("{#{inspect(hook.module)}, :#{hook.argument}}")
 
         with {:ok, argument} <- Igniter.Code.Function.move_to_nth_argument(cursor, 1),
-             {:ok, on_mount} <- Igniter.Code.Keyword.get_key(argument, :on_mount) do
-          Sourceror.to_string(on_mount.node) == Sourceror.to_string(expected)
+             {:ok, on_mount} <- Igniter.Code.Keyword.get_key(argument, :on_mount),
+             true <- is_list(on_mount.node) do
+          Enum.any?(on_mount.node, &(Sourceror.to_string(&1) == Sourceror.to_string(expected)))
         else
           _missing -> false
         end
       else
         authenticated_ancestor?(Sourceror.Zipper.up(cursor), hook)
+      end
+    end
+
+    defp route_view_matches?(cursor, target) do
+      with {:ok, view} <- Igniter.Code.Function.move_to_nth_argument(cursor, 1),
+           {:__aliases__, _, parts} <- view.node,
+           {:ok, prefix} <- scope_prefix(Sourceror.Zipper.up(cursor), []) do
+        Enum.map(prefix ++ parts, &Atom.to_string/1) == Module.split(target)
+      else
+        _unknown -> false
+      end
+    end
+
+    defp scope_prefix(nil, prefixes), do: {:ok, prefixes}
+
+    defp scope_prefix(cursor, prefixes) do
+      if Igniter.Code.Function.function_call?(cursor, :scope, [1, 2, 3]) do
+        case Igniter.Code.Function.move_to_nth_argument(cursor, 1) do
+          {:ok, %{node: {:__aliases__, _, parts}}} ->
+            scope_prefix(Sourceror.Zipper.up(cursor), parts ++ prefixes)
+
+          {:ok, %{node: options}} when is_list(options) ->
+            if Keyword.has_key?(options, :alias),
+              do: {:error, :unverified_scope_alias},
+              else: scope_prefix(Sourceror.Zipper.up(cursor), prefixes)
+
+          :error ->
+            scope_prefix(Sourceror.Zipper.up(cursor), prefixes)
+
+          _unknown ->
+            {:error, :unverified_scope_alias}
+        end
+      else
+        scope_prefix(Sourceror.Zipper.up(cursor), prefixes)
       end
     end
 

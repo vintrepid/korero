@@ -77,6 +77,9 @@ mix korero.install --live-view MyAppWeb.InboxLive \
 
 User resource, repository, domain and router are configurable. Existing files
 are preserved; repeat installation does not claim unverified routes are private.
+Use `--task-resource`, `--message-resource` and `--channel-resource` to map existing
+host models. Task and message can name the same combined resource; the installer
+preserves it and does not generate parallel models for the same work.
 An installer cannot invent identity policies, channel providers or a placeholder
 client and call them a completed integration. AshLotus delegates to this native
 installer rather than maintaining another implementation.

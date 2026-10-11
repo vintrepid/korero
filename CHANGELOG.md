@@ -8,7 +8,7 @@
   subject-authorized classification backed by the separate TagAsh library.
 - Add an idempotent native installer for private host resources, explicit
   authenticated routes and Ash code generation, with no implicit provider or jobs.
-- Verify 58 native/core/client/installer tests and patched Ash/Decimal security
+- Verify 62 native/core/client/installer tests and patched Ash/Decimal security
   floors through `mix precommit`; no advisory suppressions remain.
 - Add host-composed personal filing, folders, and Trash-retention preferences.
 - Keep archive, soft Trash, emptied tombstones, and stars separate from task

@@ -96,6 +96,30 @@ defmodule Korero.ChannelTest do
              Ash.create(Channel, attributes(), action: :configure, authorize?: false)
   end
 
+  test "a forged in-memory record cannot transfer another person's configuration", %{
+    owner: owner,
+    stranger: stranger
+  } do
+    own = configure!(owner)
+    forged = %{own | user_id: stranger.id}
+
+    assert {:error, _} =
+             Ash.update(forged, %{label: "Forged transfer"},
+               action: :update_configuration,
+               actor: stranger,
+               authorize?: false
+             )
+
+    assert {:error, _} =
+             Ash.update(%{own | key: "another_key"}, %{label: "Forged key"},
+               action: :update_configuration,
+               actor: owner
+             )
+
+    assert Ash.get!(Channel, own.id, actor: owner).user_id == owner.id
+    assert Ash.get!(Channel, own.id, actor: owner).label == own.label
+  end
+
   defp configure!(actor, changes \\ %{}),
     do: Ash.create!(Channel, Map.merge(attributes(), changes), action: :configure, actor: actor)
 

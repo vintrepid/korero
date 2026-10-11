@@ -33,10 +33,23 @@ defmodule Korero.Scope do
           |> Ash.Changeset.force_change_attribute(:user_id, scope.user_id)
           |> Ash.Changeset.force_change_attribute(:app_key, scope.app_key)
         else
-          if changeset.data.user_id == scope.user_id and changeset.data.app_key == scope.app_key,
-            do: changeset,
-            else:
+          options = [actor: context.actor, tenant: context.tenant, authorize?: true]
+
+          case Ash.get(changeset.resource, changeset.data.id, options) do
+            {:ok, %{user_id: user_id, app_key: app_key} = persisted}
+            when user_id == scope.user_id and app_key == scope.app_key ->
+              if Map.take(changeset.data, [:id, :user_id, :app_key, :key]) ==
+                   Map.take(persisted, [:id, :user_id, :app_key, :key]),
+                 do: changeset,
+                 else:
+                   Ash.Changeset.add_error(
+                     changeset,
+                     "channel scope differs from its persisted configuration"
+                   )
+
+            _forbidden ->
               Ash.Changeset.add_error(changeset, "channel configuration belongs to another scope")
+          end
         end
 
       {:error, error} ->

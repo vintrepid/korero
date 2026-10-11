@@ -52,9 +52,9 @@ defmodule Korero.Phoenix.Components do
           <button :if={@can_compose?} id="inbox-new-message" type="button" phx-click="new_message">
             New message
           </button>
-          <.form :if={Map.get(@client.filter, :configurable?, false)}
+          <.form :if={Map.get(@client.filter, :configurable?, false) or Map.get(@client.filter, :workflow_options, []) != []}
             for={@filter_form} id="inbox-filter" phx-change="filter_inbox">
-            <label :if={Map.get(@client.filter, :participant_options, []) != []}>
+            <label :if={Map.get(@client.filter, :configurable?, false) and Map.get(@client.filter, :participant_options, []) != []}>
               People
               <select id="inbox-participant" name={@filter_form[:participant].name}>
                 <option :for={option <- @client.filter.participant_options}

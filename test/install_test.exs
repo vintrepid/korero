@@ -65,7 +65,8 @@ defmodule Korero.InstallTest do
             "Missing.Hook:required",
             "--yes"
           ],
-          ["--path", "https://example.invalid/inbox", "--yes"]
+          ["--path", "https://example.invalid/inbox", "--yes"],
+          ["--domain", "invalid.module", "--yes"]
         ] do
       igniter = install(argv)
       refute igniter.issues == []
@@ -78,6 +79,56 @@ defmodule Korero.InstallTest do
     install(["--yes"])
     |> assert_has_notice(&String.contains?(&1, "No Inbox route installed"))
     |> assert_unchanged("lib/korero_install_fixture_web/router.ex")
+  end
+
+  test "an existing AshAuthentication session with additional hooks and a scoped view is preserved" do
+    files = fixture_files()
+
+    router =
+      String.replace(files["lib/korero_install_fixture_web/router.ex"], "# host routes", """
+      scope "/", KoreroInstallFixtureWeb do
+        ash_authentication_live_session :private_research,
+          on_mount: [{KoreroInstallFixtureWeb.LiveUserAuth, :optional}, {KoreroInstallFixtureWeb.LiveUserAuth, :live_user_required}] do
+          live "/inbox", InboxLive, :index
+        end
+      end
+      """)
+
+    igniter = install(@argv, Map.put(files, "lib/korero_install_fixture_web/router.ex", router))
+    assert igniter.issues == []
+    assert_unchanged(igniter, "lib/korero_install_fixture_web/router.ex")
+  end
+
+  test "a host can map task and message to its existing combined resource without parallel models" do
+    files =
+      Map.put(fixture_files(), "lib/korero_install_fixture/korero/item.ex", """
+      defmodule KoreroInstallFixture.Korero.Item do
+        def host_owned_contract, do: :preserved
+      end
+      """)
+
+    argv = [
+      "--task-resource",
+      "KoreroInstallFixture.Korero.Item",
+      "--message-resource",
+      "KoreroInstallFixture.Korero.Item",
+      "--yes"
+    ]
+
+    igniter = install(argv, files)
+    assert igniter.issues == []
+    assert_unchanged(igniter, "lib/korero_install_fixture/korero/item.ex")
+    refute_creates(igniter, "lib/korero_install_fixture/korero/task.ex")
+    refute_creates(igniter, "lib/korero_install_fixture/korero/message.ex")
+
+    state =
+      Rewrite.Source.get(
+        Rewrite.source!(igniter.rewrite, "lib/korero_install_fixture/korero/inbox_item_state.ex"),
+        :content
+      )
+
+    assert state =~ ~s("task" => KoreroInstallFixture.Korero.Item)
+    assert state =~ ~s("message" => KoreroInstallFixture.Korero.Item)
   end
 
   test "host ownership and mutable customizations survive reruns" do
