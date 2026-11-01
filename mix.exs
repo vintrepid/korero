@@ -37,15 +37,15 @@ defmodule Korero.MixProject do
 
   defp deps do
     [
-      {:ash, "~> 3.37 and >= 3.37.2"},
-      {:ash_state_machine, "~> 0.3.0"},
-      {:oban, "~> 2.24 and >= 2.24.2"},
-      {:ash_oban, "~> 0.10.3"},
+      {:ash, ">= 3.37.2"},
+      {:ash_state_machine, ">= 0.3.0"},
+      {:oban, ">= 2.24.2"},
+      {:ash_oban, ">= 0.10.3"},
       # Security floor for an existing transitive dependency; see SECURITY.md.
-      {:decimal, ">= 3.0.0 and < 4.0.0"},
-      {:sourceror, "~> 1.13", only: [:dev, :test], runtime: false},
-      {:simple_sat, "~> 0.1.4", only: :test},
-      {:ex_doc, "~> 0.40.4", only: :dev, runtime: false}
+      {:decimal, ">= 3.0.0"},
+      {:sourceror, ">= 1.13.0", only: [:dev, :test], runtime: false},
+      {:simple_sat, ">= 0.1.4", only: :test},
+      {:ex_doc, ">= 0.40.4", only: :dev, runtime: false}
     ]
   end
 
