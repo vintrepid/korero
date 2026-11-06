@@ -48,21 +48,21 @@ defmodule Korero.MixProject do
 
   defp deps do
     [
-      {:ash, "~> 3.34 and >= 3.34.6"},
-      {:ash_state_machine, "~> 0.2.13"},
-      {:oban, "~> 2.23"},
-      {:ash_oban, "~> 0.8.14"},
-      {:tag_ash, github: "vintrepid/tag_ash", ref: "a525fc456e4b0828f08fc61c956c439378ccc2aa"},
-      {:phoenix_live_view, "~> 1.2 and >= 1.2.11"},
-      {:phoenix_html, "~> 4.3"},
+      {:tag_ash, github: "vintrepid/tag_ash", ref: "d5ec832df30a82cd7a16e18ce7fa9007aa4adf1f"},
+      {:phoenix_live_view, "~> 1.2 and >= 1.2.13"},
+      {:phoenix_html, "~> 4.4"},
       {:jason, "~> 1.4"},
-      {:igniter, "~> 0.8.4", optional: true},
+      {:igniter, "~> 0.8.5", optional: true},
       {:lazy_html, ">= 0.0.0", only: :test},
+      {:ash, ">= 3.37.2"},
+      {:ash_state_machine, ">= 0.3.0"},
+      {:oban, ">= 2.24.2"},
+      {:ash_oban, ">= 0.10.3"},
       # Security floor for an existing transitive dependency; see SECURITY.md.
-      {:decimal, "~> 3.1.2"},
-      {:sourceror, "~> 1.12"},
-      {:simple_sat, "~> 0.1 and >= 0.1.1", only: :test},
-      {:ex_doc, "~> 0.38", only: [:dev, :test], runtime: false}
+      {:decimal, ">= 3.0.0"},
+      {:sourceror, ">= 1.13.0"},
+      {:simple_sat, ">= 0.1.4", only: :test},
+      {:ex_doc, ">= 0.40.4", only: [:dev, :test], runtime: false}
     ]
   end
 
