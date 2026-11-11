@@ -48,10 +48,10 @@ defmodule Korero.MixProject do
 
   defp deps do
     [
-      {:tag_ash, github: "vintrepid/tag_ash", ref: "d5ec832df30a82cd7a16e18ce7fa9007aa4adf1f"},
+      {:tag_ash, github: "vintrepid/tag_ash", ref: "41773a38049c22b902d4c9390d8cb9abbf67a07f"},
       {:phoenix_live_view, "~> 1.2 and >= 1.2.13"},
       {:phoenix_html, "~> 4.4"},
-      {:jason, "~> 1.4"},
+      {:jason, "~> 1.4 and >= 1.4.5"},
       {:igniter, "~> 0.8.5", optional: true},
       {:lazy_html, ">= 0.0.0", only: :test},
       {:ash, ">= 3.37.2"},
